@@ -7,15 +7,18 @@
 #define MAP_TOTAL_SIZE_X 18950
 #define MAP_TOTAL_SIZE_Y 18950
 
+typedef unsigned char byte;
+typedef unsigned short word;
 
 
 
 std::map<std::string, tile> tileTypeMap;
 std::map<std::tuple<int, int>, tile*> screenView;
 
-boat player(525, 525);
-
 tile* generateTile(int x, int y) {
+	if (x < 0 || y < 0) {
+		return &tileTypeMap["edge"];
+	}
 	if (x == 6 || x == 16 || y == 6 || y == 16) {
 		return &tileTypeMap["default5"];
 	}
@@ -47,9 +50,14 @@ public:
 	}
 
 public:
+
+	boat player;
+
 	bool OnUserCreate() override
 	{
 		// Called once at the start, so create things here
+
+		player = boat(525, 525);
 
 		tileTypeMap["default"] = tile(0, 0, "default", "default.png");
 		tileTypeMap["default5"] = tile(0, 0, "default", "default5.png");
@@ -58,11 +66,12 @@ public:
 		tileTypeMap["default2"] = tile(0, 0, "default", "default2.png");
 		tileTypeMap["default1"] = tile(0, 0, "default", "default1.png");
 		tileTypeMap["default0"] = tile(0, 0, "default", "default0.png");
+		tileTypeMap["edge"] = tile(0, 0, "default", "edge.png");
 
 		//Create initial 11x11 tile map
 		for (int i = -5; i <= 5; i++) {
 			for (int j = -5; j <= 5; j++) {
-				screenView[{i, j}] = generateTile(ceil(player.x/40) + i, ceil(player.y/40) + j);
+				screenView[{i, j}] = generateTile(ceil(player.x/50) + i, ceil(player.y/50) + j);
 			}
 		}
 
@@ -72,7 +81,8 @@ public:
 	bool OnUserUpdate(float fElapsedTime) override
 	{
 		Clear(olc::BLACK);
-		
+		SetPixelMode(olc::Pixel::MASK);
+
 		int cornerx = player.x - 250;
 		int cornery = player.y - 250;
 
@@ -97,17 +107,19 @@ public:
 		int premoveTilex = boatTilex;
 		int premoveTiley = boatTiley;
 
-		if (GetKey(olc::UP).bHeld) { player.y -= (100 * fElapsedTime); };
-		if (GetKey(olc::DOWN).bHeld) { player.y += (100 * fElapsedTime); };
-		if (GetKey(olc::RIGHT).bHeld) {player.x += (100 * fElapsedTime); };
+		if (GetKey(olc::UP).bHeld) { player.y -= (10 * fElapsedTime); };
+		if (GetKey(olc::DOWN).bHeld) { player.y += (50 * fElapsedTime); };
+		if (GetKey(olc::RIGHT).bHeld) { player.x += (50 * fElapsedTime); };
 		if (GetKey(olc::LEFT).bHeld) { player.x -= (10 * fElapsedTime); };
+		if (GetKey(olc::Q).bHeld) { player.angle -= (10 * fElapsedTime); };
+		if (GetKey(olc::E).bHeld) { player.angle += (10 * fElapsedTime); };
 
 		boatTilex = ceil(player.x / 50);
 		boatTiley = ceil(player.y / 50);
 
 		if ((premoveTilex != boatTilex) || (premoveTiley != boatTiley)) {
-			unsigned char xdiff = boatTilex - premoveTilex;
-			unsigned char ydiff = boatTiley - premoveTiley;
+			byte xdiff = boatTilex - premoveTilex;
+			byte ydiff = boatTiley - premoveTiley;
 
 			unsigned short diff = ((unsigned short)xdiff << 8) + (unsigned short)ydiff;
 			/*
@@ -123,7 +135,7 @@ public:
 				01FF moved up and right (NORTH-EAST)
 				FFFF moved up and left (NORTH-WEST)
 			*/
-			
+
 			std::map<std::tuple<int, int>, tile*> newView;
 
 			switch (diff) {
@@ -135,7 +147,7 @@ public:
 							newView[{i, j}] = screenView[{i, j + 1}];
 						}
 						if (j == 5) {
-							newView[{i, j}] = generateTile(ceil(player.x / 40) + i, ceil(player.y / 40) + j);
+							newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
 						}
 					}
 				}
@@ -149,7 +161,7 @@ public:
 							newView[{i, j}] = screenView[{i, j - 1}];
 						}
 						if (j == -5) {
-							newView[{i, j}] = generateTile(ceil(player.x/40) + i, ceil(player.y/40) + j);
+							newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
 						}
 					}
 				}
@@ -160,10 +172,10 @@ public:
 				for (int i = -5; i <= 5; i++) {
 					for (int j = -5; j <= 5; j++) {
 						if (i < 5) {
-							newView[{i, j}] = screenView[{i+1, j}];
+							newView[{i, j}] = screenView[{i + 1, j}];
 						}
 						if (i == 5) {
-							newView[{i, j}] = generateTile(ceil(player.x / 40) + i, ceil(player.y / 40) + j);
+							newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
 						}
 					}
 				}
@@ -174,10 +186,10 @@ public:
 				for (int i = -5; i <= 5; i++) {
 					for (int j = -5; j <= 5; j++) {
 						if (i > -5) {
-							newView[{i, j}] = screenView[{i-1, j}];
+							newView[{i, j}] = screenView[{i - 1, j}];
 						}
 						if (i == -5) {
-							newView[{i, j}] = generateTile(ceil(player.x / 40) + i, ceil(player.y / 40) + j);
+							newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
 						}
 					}
 				}
@@ -195,10 +207,13 @@ public:
 			}
 		}
 
-		DrawString(10,10, std::to_string(player.x));
-		DrawString(10,30, std::to_string(player.y));
+		DrawString(10, 10, std::to_string(player.x) + " (" + std::to_string(boatTilex) + "," + std::to_string(boatTiley) + ")");
+		DrawString(10, 30, std::to_string(player.y));
 
-		DrawRect(245,240,10,20);
+		//DrawRect(245,240,10,20);
+
+		//DrawSprite(245, 240, &player.sprite);
+		DrawRotatedDecal({245, 240}, &player.decal, player.angle, { 5,10 }, { 1,1 });
 
 		return true;
 	}
