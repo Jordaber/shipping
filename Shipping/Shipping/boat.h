@@ -18,12 +18,14 @@ public:
 		this->x = x;
 		this->y = y;
 		this->sprite = olc::Sprite("default.png");
+		decal = olc::Decal(&sprite);
 	}
 
 	boat(int x, int y) {
 		this->x = x;
 		this->y = y;
 		this->sprite = olc::Sprite("boat.png");
+		decal = olc::Decal(&sprite);
 	}
 };
 

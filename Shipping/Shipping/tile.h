@@ -24,6 +24,7 @@ public:
 	std::string type = "default";
 	float fTemp = 8.0f;
 	olc::Sprite sprite;
+	olc::Decal decal = olc::Decal(&sprite);
 
 	bool isAnimated = false;
 	int x;

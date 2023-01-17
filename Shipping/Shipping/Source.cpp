@@ -7,6 +7,8 @@
 #define MAP_TOTAL_SIZE_X 18950
 #define MAP_TOTAL_SIZE_Y 18950
 
+# define PI 3.141592653589793238462643383279502884L
+
 typedef unsigned char byte;
 typedef unsigned short word;
 
@@ -43,15 +45,18 @@ tile* generateTile(int x, int y) {
 
 class Example : public olc::PixelGameEngine
 {
+private:
+
 public:
 	Example()
 	{
 		sAppName = "Shipping Game very cool wooooooooow";
 	}
 
-public:
-
 	boat player;
+	olc::Sprite boatsprite;
+
+	olc::Decal boatdecal = olc::Decal(&boatsprite);
 
 	bool OnUserCreate() override
 	{
@@ -74,6 +79,10 @@ public:
 				screenView[{i, j}] = generateTile(ceil(player.x/50) + i, ceil(player.y/50) + j);
 			}
 		}
+
+		boatsprite = olc::Sprite("boat.png");
+		boatdecal = olc::Decal(&player.sprite);
+		boatdecal.UpdateSprite();
 
 		return true;
 	}
@@ -107,10 +116,19 @@ public:
 		int premoveTilex = boatTilex;
 		int premoveTiley = boatTiley;
 
-		if (GetKey(olc::UP).bHeld) { player.y -= (10 * fElapsedTime); };
-		if (GetKey(olc::DOWN).bHeld) { player.y += (50 * fElapsedTime); };
-		if (GetKey(olc::RIGHT).bHeld) { player.x += (50 * fElapsedTime); };
-		if (GetKey(olc::LEFT).bHeld) { player.x -= (10 * fElapsedTime); };
+		if (GetKey(olc::UP).bHeld) { //player.y -= (10 * fElapsedTime * (player.y > 10));
+			float angleDeg = player.angle * (180/PI);
+
+			float o = sin(angleDeg) * 50 * fElapsedTime;
+			float a = cos(angleDeg) * 50 * fElapsedTime;
+
+			player.x += o;
+			player.y += a;
+
+		};
+		if (GetKey(olc::DOWN).bHeld) { player.y += (50 * fElapsedTime * (player.y < 947500)); };
+		if (GetKey(olc::RIGHT).bHeld) { player.x += (50 * fElapsedTime * (player.x < 947500)); };
+		if (GetKey(olc::LEFT).bHeld) { player.x -= (10 * fElapsedTime * (player.x > 5)); };
 		if (GetKey(olc::Q).bHeld) { player.angle -= (10 * fElapsedTime); };
 		if (GetKey(olc::E).bHeld) { player.angle += (10 * fElapsedTime); };
 
@@ -213,7 +231,7 @@ public:
 		//DrawRect(245,240,10,20);
 
 		//DrawSprite(245, 240, &player.sprite);
-		DrawRotatedDecal({245, 240}, &player.decal, player.angle, { 5,10 }, { 1,1 });
+		DrawRotatedDecal({ 245,240 }, &boatdecal, player.angle, { 5,10 }, {1,1});
 
 		return true;
 	}
