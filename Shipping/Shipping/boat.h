@@ -1,18 +1,21 @@
 #pragma once
 #include <string>
+#include "constants.h"
+#include "port.h"
 
 class boat
 {
 public:
-	int x;
-	int y;
-	float angle = 0;
+	double x;
+	double y;
+	double angle = 0;
 
 	std::string spriteaddr = "boat.png";
 	olc::Sprite sprite;
 	olc::Decal decal = olc::Decal(&sprite);
 	std::string name = "POLARIS NST-B03-RTF";
 	std::string allegiance = "INDEPENDANT";
+	port* currentPort;
 
 	boat() {
 		this->x = x;

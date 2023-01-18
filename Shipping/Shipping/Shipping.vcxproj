@@ -88,6 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,7 +144,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="boat.h" />
+    <ClInclude Include="constants.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
+    <ClInclude Include="PerlinNoise.hpp" />
+    <ClInclude Include="person.h" />
+    <ClInclude Include="port.h" />
     <ClInclude Include="resources.h" />
     <ClInclude Include="tile.h" />
   </ItemGroup>
