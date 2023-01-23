@@ -2,11 +2,15 @@
 #include "olcPixelGameEngine.h"
 #include "tile.h"
 #include <map>
+#include <fstream>
+#include "nlohmann/json.hpp"
 #include "boat.h"
 #include "port.h"
 #include "person.h"
 #include "constants.h"
 #include "PerlinNoise.hpp"
+
+using json = nlohmann::json;
 
 #define MAP_TOTAL_SIZE_X 18950
 #define MAP_TOTAL_SIZE_Y 18950
@@ -16,11 +20,12 @@ int SEED = 34413;
 typedef unsigned char byte;
 typedef unsigned short word;
 
-std::map<std::string, port> portMap;
+std::map<std::tuple<int,int>, port> portMap;
 
 std::map<int, person> personMap;
 
 std::map<std::string, tile> tileTypeMap;
+
 std::map<std::tuple<int, int>, tile*> screenView;
 const siv::PerlinNoise::seed_type seed = 123456u;
 
@@ -32,7 +37,7 @@ std::map<std::tuple<int, int>, tile*> generateIsland(int x, int y) {
 
 	std::map<std::tuple<int, int>, tile*> islandMap;
 
-
+	srand(x+y);
 
 	struct blob {
 		int x;
@@ -44,31 +49,60 @@ std::map<std::tuple<int, int>, tile*> generateIsland(int x, int y) {
 
 	for (int i = 0; i < 6; i++) {
 		blob b;
-		b.x = 10 + rand() % 30;
-		b.y = 10 + rand() % 30;
+		b.x = 13 + rand() % 16;
+		b.y = 13 + rand() % 16;
 		b.radius = rand() % 8;
 		blobs.push_back(b);
 	}
 
 	for (int i = 0; i < 40; i++) {
-		for (int j = 0; j < 40; i++) {
+		for (int j = 0; j < 40; j++) {
+			bool found = false;
 			for (blob b : blobs) {
-				int xs = (i - b.x) ^ 2;
-				int ys = (j - b.y) ^ 2;
+				int xs = pow((i - b.x),2);
+				int ys = pow((j - b.y),2);
+
 				double d = sqrt(xs + ys);
+				if (ceil(d) == b.radius) {
+					islandMap[{i, j}] = &tileTypeMap["defaultL"];
+				}
 				if (d < b.radius) {
-					islandMap[{i, j}] = &tileTypeMap["default2"];
+					islandMap[{i, j}] = &tileTypeMap["defaultL"];
+					found = true;
 					break;
 				}
 			}
-			islandMap[{i, j}] = &tileTypeMap["default1"];
+			if(!found)
+				islandMap[{i, j}] = &tileTypeMap["defaultS"];
 		}
 	}
+	
+	for (int i = 1; i < 39; i++) {
+		for (int j = 1; j < 39; j++) {
+			if (islandMap[{i, j}]->type == "defaultl") {
+				byte v = 0;
+				
+				v += 0b0001 * (islandMap[{i, j-1}]->type != "defaults");
+				v += 0b0010 * (islandMap[{i+1, j}]->type != "defaults");
+				v += 0b0100 * (islandMap[{i, j+1}]->type != "defaults");
+				v += 0b1000 * (islandMap[{i-1, j}]->type != "defaults");
+				
+
+				int xp = i+1;
+				int xm = i - 1;
+				int yp = j + 1;
+				int ym = j - 1;
+
+				islandMap[{i, j}] = &tileTypeMap["tile" + std::to_string((int)v)];
+			}
+		}
+	}
+	
 
 	return islandMap;
 }
 
-std::map<std::tuple<int, int>, tile*> islandMap = generateIsland(0, 0);
+std::map<std::tuple<int, int>, tile*> islandMap;
 
 tile* generateTile(int x, int y) {
 	/*
@@ -123,6 +157,10 @@ tile* generateTile(int x, int y) {
 		return &tileTypeMap["default0"];
 	}*/
 
+	//Roughly O(1) complexity
+	if (x < 0 || y < 0 || x > 39 || y > 39) {
+		return &tileTypeMap["edge"];
+	}
 	return(islandMap[{x, y}]);
 
 }
@@ -150,26 +188,47 @@ public:
 	{
 		// Called once at the start, so create things here
 
-
-
-		player = boat(200, 200);
-		portSprite = olc::Sprite("port.png");
-
 		tileTypeMap["default"] = tile(0, 0, "default", "default.png");
-		tileTypeMap["default5"] = tile(0, 0, "default", "default5.png");
-		tileTypeMap["default4"] = tile(0, 0, "default", "default4.png");
-		tileTypeMap["default3"] = tile(0, 0, "default", "default3.png");
-		tileTypeMap["default2"] = tile(0, 0, "default", "default2.png");
-		tileTypeMap["default1"] = tile(0, 0, "default", "default1.png");
-		tileTypeMap["default0"] = tile(0, 0, "default", "default0.png");
+		tileTypeMap["defaultL"] = tile(0, 0, "defaultl", "default.png");
+		tileTypeMap["defaultS"] = tile(0, 0, "defaults", "tiles.png");
+		tileTypeMap["tile0"] = tile(0, 0, "default", "tile0.png");
+		tileTypeMap["tile1"] = tile(0, 0, "default", "tile1.png");
+		tileTypeMap["tile2"] = tile(0, 0, "default", "tile2.png");
+		tileTypeMap["tile3"] = tile(0, 0, "default", "tile3.png");
+		tileTypeMap["tile4"] = tile(0, 0, "default", "tile4.png");
+		tileTypeMap["tile5"] = tile(0, 0, "default", "tile5.png");
+		tileTypeMap["tile6"] = tile(0, 0, "default", "tile6.png");
+		tileTypeMap["tile7"] = tile(0, 0, "default", "tile7.png");
+		tileTypeMap["tile8"] = tile(0, 0, "default", "tile8.png");
+		tileTypeMap["tile9"] = tile(0, 0, "default", "tile9.png");
+		tileTypeMap["tile10"] = tile(0, 0, "default", "tile10.png");
+		tileTypeMap["tile11"] = tile(0, 0, "default", "tile11.png");
+		tileTypeMap["tile12"] = tile(0, 0, "default", "tile12.png");
+		tileTypeMap["tile13"] = tile(0, 0, "default", "tile13.png");
+		tileTypeMap["tile14"] = tile(0, 0, "default", "tile14.png");
+		tileTypeMap["tile15"] = tile(0, 0, "default", "tile15.png");
 		tileTypeMap["edge"] = tile(0, 0, "default", "edge.png");
 
-		personMap[0] = person("Alice Balls", "Dr", "UK");
+		player = boat(750, 750);
+		portSprite = olc::Sprite("port.png");
 
-		portMap["none"] = port(0, 0, "None", &personMap[0]);
-		portMap["arbroath"] = port(0,0,"Arbroath", &personMap[0]);
+		std::fstream fpeople("people.json");
+		std::fstream fislands("islands.json");
 
-		player.currentPort = &portMap["arbroath"];
+		json peopleData = json::parse(fpeople);
+		personMap[peopleData["id"]] = person(peopleData["name"], peopleData["title"], peopleData["faction"]);
+
+		//personMap[0] = person("Alice Balls", "Dr", "UK");
+
+		json islandsData = json::parse(fislands);
+		portMap[{islandsData["x"], islandsData["y"]}] = port(islandsData["x"], islandsData["y"], islandsData["name"], &personMap[islandsData["leader"]]);
+
+		//portMap["none"] = port(0, 0, "None", &personMap[0]);
+		//portMap["arbroath"] = port(0,0,"Arbroath", &personMap[0]);
+
+		player.currentPort = &portMap[{islandsData["x"], islandsData["y"]}];
+
+		islandMap = generateIsland(player.currentPort->x, player.currentPort->y);
 
 		
 
@@ -269,6 +328,14 @@ public:
 
 				std::map<std::tuple<int, int>, tile*> newView;
 
+				for (int i = -5; i <= 5; i++) {
+					for (int j = -5; j <= 5; j++) {
+						newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
+					}
+				}
+				screenView = newView;
+
+				/*
 				switch (diff) {
 				case 0x0001:
 					//Move all tiles up relative
@@ -328,14 +395,83 @@ public:
 					screenView = newView;
 					break;
 				case 0x0101:
+					//Move tiles up and right
+					for (int i = -5; i <= 5; i++) {
+						for (int j = -5; j <= 5; j++) {
+							if (j < 5) {
+								newView[{i, j}] = screenView[{i, j + 1}];
+							}
+							if (j == 5) {
+								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
+							}
+							if (i > -5) {
+								newView[{i, j}] = screenView[{i - 1, j}];
+							}
+							if (i == -5) {
+								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
+							}
+						}
+					}
 					break;
 				case 0xFF01:
+					//Move tiles up and left
+					for (int i = -5; i <= 5; i++) {
+						for (int j = -5; j <= 5; j++) {
+							if (j < 5) {
+								newView[{i, j}] = screenView[{i, j + 1}];
+							}
+							if (j == 5) {
+								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
+							}
+							if (i < 5) {
+								newView[{i, j}] = screenView[{i + 1, j}];
+							}
+							if (i == 5) {
+								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
+							}
+						}
+					}
 					break;
 				case 0x01FF:
+					//Move tiles down and left
+					for (int i = -5; i <= 5; i++) {
+						for (int j = -5; j <= 5; j++) {
+							if (j > -5) {
+								newView[{i, j}] = screenView[{i, j - 1}];
+							}
+							if (j == -5) {
+								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
+							}
+							if (i < 5) {
+								newView[{i, j}] = screenView[{i + 1, j}];
+							}
+							if (i == 5) {
+								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
+							}
+						}
+					}
 					break;
 				case 0xFFFF:
+					//Move tiles down and right
+					for (int i = -5; i <= 5; i++) {
+						for (int j = -5; j <= 5; j++) {
+							if (j > -5) {
+								newView[{i, j}] = screenView[{i, j - 1}];
+							}
+							if (j == -5) {
+								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
+							}
+							if (i > -5) {
+								newView[{i, j}] = screenView[{i - 1, j}];
+							}
+							if (i == -5) {
+								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
+							}
+						}
+					}
 					break;
 				}
+				*/
 			}
 
 
@@ -375,6 +511,7 @@ public:
 int main()
 {
 
+	
 	Example demo;
 	if (demo.Construct(500, 500, 1, 1))
 		demo.Start();
