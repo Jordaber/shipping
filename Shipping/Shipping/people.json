@@ -1,8 +1,18 @@
 {
-	"id": 0,
-	"name": "Alice Balls",
-	"title": "Dr. ",
-	"faction": "UK",
-	"sprite": "person.png",
-	"initialText": "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit, sed do eiusmod tempor\nincididunt ut labore et dolore magna\naliqua. Ut enim ad minim veniam,\nquis nostrud exercitation ullamco laboris nisi\n"
+	"0" : {
+		"id": 0,
+		"name": "Alice Balls",
+		"title": "Dr. ",
+		"faction": "UK",
+		"sprite": "person.png",
+		"initialText": "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit, sed do eiusmod tempor\nincididunt ut labore et dolore magna\naliqua. Ut enim ad minim veniam,\nquis nostrud exercitation ullamco laboris nisi\n"
+	},
+	"1" : {
+		"id": 1,
+		"name": "Buster Bloodvessel",
+		"title": "Mayor ",
+		"faction": "UK",
+		"sprite": "people/specific/buster.png",
+		"initialText": "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit, sed do eiusmod tempor\nincididunt ut labore et dolore magna\naliqua. Ut enim ad minim veniam,\nquis nostrud exercitation ullamco laboris nisi\n"
+	}
 }

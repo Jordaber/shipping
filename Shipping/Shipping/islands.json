@@ -1,8 +1,18 @@
 {
-	"tag": "ballerbay",
-	"x" : 89,
-	"y" : 104,
-	"name" : "Baller Bay",
-	"image": "port.png",
-	"leader" : 0
+	"ballerbay" : {
+		"tag": "ballerbay",
+		"x" : 89,
+		"y" : 104,
+		"name" : "Baller Bay",
+		"image": "port.png",
+		"leader" : 0
+	},
+	"ligmalagoon" : {
+		"tag": "ligmalagoon",
+		"x" : 302,
+		"y" : 108,
+		"name" : "Ligma Lagoon",
+		"image": "port.png",
+		"leader" : 1
+	}
 }

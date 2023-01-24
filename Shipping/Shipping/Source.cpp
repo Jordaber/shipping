@@ -33,7 +33,7 @@ const siv::PerlinNoise perlin{ seed };
 
 std::list<std::tuple<int, int>> islands;
 
-std::map<std::tuple<int, int>, tile*> generateIsland(int x, int y) {
+std::map<std::tuple<int, int>, tile*> generateIsland(int x, int y, int px, int py) {
 
 	std::map<std::tuple<int, int>, tile*> islandMap;
 
@@ -50,13 +50,15 @@ std::map<std::tuple<int, int>, tile*> generateIsland(int x, int y) {
 	for (int i = 0; i < 6; i++) {
 		blob b;
 		b.x = 13 + rand() % 16;
+		b.x += px;
 		b.y = 13 + rand() % 16;
+		b.y += py;
 		b.radius = rand() % 8;
 		blobs.push_back(b);
 	}
 
-	for (int i = 0; i < 40; i++) {
-		for (int j = 0; j < 40; j++) {
+	for (int i = px; i < px+40; i++) {
+		for (int j = py; j < py+40; j++) {
 			bool found = false;
 			for (blob b : blobs) {
 				int xs = pow((i - b.x),2);
@@ -77,8 +79,8 @@ std::map<std::tuple<int, int>, tile*> generateIsland(int x, int y) {
 		}
 	}
 	
-	for (int i = 1; i < 39; i++) {
-		for (int j = 1; j < 39; j++) {
+	for (int i = px+1; i < px+39; i++) {
+		for (int j = py+1; j < py+39; j++) {
 			if (islandMap[{i, j}]->type == "defaultl") {
 				byte v = 0;
 				
@@ -158,10 +160,17 @@ tile* generateTile(int x, int y) {
 	}*/
 
 	//Roughly O(1) complexity
-	if (x < 0 || y < 0 || x > 39 || y > 39) {
+	if (x < 0 || y < 0 || x > MAP_TOTAL_SIZE_X || y > MAP_TOTAL_SIZE_Y) {
 		return &tileTypeMap["edge"];
 	}
-	return(islandMap[{x, y}]);
+
+	if (!islandMap.empty()) {
+		return(islandMap[{x, y}]);
+	}
+	else{
+		return &tileTypeMap["defaultS"];
+	}
+
 
 }
 
@@ -183,6 +192,7 @@ public:
 	olc::Sprite portSprite;
 
 	byte menueOpen = PORT; //ENUM(map,port,)
+	std::tuple<int, int> CurrentIslandCoord;
 
 	bool OnUserCreate() override
 	{
@@ -190,47 +200,48 @@ public:
 
 		tileTypeMap["default"] = tile(0, 0, "default", "default.png");
 		tileTypeMap["defaultL"] = tile(0, 0, "defaultl", "default.png");
-		tileTypeMap["defaultS"] = tile(0, 0, "defaults", "tiles.png");
-		tileTypeMap["tile0"] = tile(0, 0, "default", "tile0.png");
-		tileTypeMap["tile1"] = tile(0, 0, "default", "tile1.png");
-		tileTypeMap["tile2"] = tile(0, 0, "default", "tile2.png");
-		tileTypeMap["tile3"] = tile(0, 0, "default", "tile3.png");
-		tileTypeMap["tile4"] = tile(0, 0, "default", "tile4.png");
-		tileTypeMap["tile5"] = tile(0, 0, "default", "tile5.png");
-		tileTypeMap["tile6"] = tile(0, 0, "default", "tile6.png");
-		tileTypeMap["tile7"] = tile(0, 0, "default", "tile7.png");
-		tileTypeMap["tile8"] = tile(0, 0, "default", "tile8.png");
-		tileTypeMap["tile9"] = tile(0, 0, "default", "tile9.png");
-		tileTypeMap["tile10"] = tile(0, 0, "default", "tile10.png");
-		tileTypeMap["tile11"] = tile(0, 0, "default", "tile11.png");
-		tileTypeMap["tile12"] = tile(0, 0, "default", "tile12.png");
-		tileTypeMap["tile13"] = tile(0, 0, "default", "tile13.png");
-		tileTypeMap["tile14"] = tile(0, 0, "default", "tile14.png");
-		tileTypeMap["tile15"] = tile(0, 0, "default", "tile15.png");
+		tileTypeMap["defaultS"] = tile(0, 0, "defaults", "tile0s.png");
+		tileTypeMap["tile0"] = tile(0, 0, "default0", "tile00.png");
+		tileTypeMap["tile1"] = tile(0, 0, "default1", "tile1.png");
+		tileTypeMap["tile2"] = tile(0, 0, "default2", "tile2.png");
+		tileTypeMap["tile3"] = tile(0, 0, "default3", "tile03.png");
+		tileTypeMap["tile4"] = tile(0, 0, "default4", "tile4.png");
+		tileTypeMap["tile5"] = tile(0, 0, "default5", "tile5.png");
+		tileTypeMap["tile6"] = tile(0, 0, "default6", "tile06.png");
+		tileTypeMap["tile7"] = tile(0, 0, "default7", "tile07.png");
+		tileTypeMap["tile8"] = tile(0, 0, "default8", "tile8.png");
+		tileTypeMap["tile9"] = tile(0, 0, "default9", "tile09.png");
+		tileTypeMap["tile10"] = tile(0, 0, "default10", "tile10.png");
+		tileTypeMap["tile11"] = tile(0, 0, "default11", "tile011.png");
+		tileTypeMap["tile12"] = tile(0, 0, "default12", "tile012.png");
+		tileTypeMap["tile13"] = tile(0, 0, "default13", "tile013.png");
+		tileTypeMap["tile14"] = tile(0, 0, "default14", "tile014.png");
+		tileTypeMap["tile15"] = tile(0, 0, "default15", "tile015.png");
 		tileTypeMap["edge"] = tile(0, 0, "default", "edge.png");
 
 		player = boat(750, 750);
 		portSprite = olc::Sprite("port.png");
 
+
+
+		//                                  READ PEOPLE AND ISALNDS FROM FILE
+		//==========================================================================================================
 		std::fstream fpeople("people.json");
 		std::fstream fislands("islands.json");
 
 		json peopleData = json::parse(fpeople);
-		personMap[peopleData["id"]] = person(peopleData["name"], peopleData["title"], peopleData["faction"]);
-
-		//personMap[0] = person("Alice Balls", "Dr", "UK");
+		for(auto it : peopleData)
+			personMap[it["id"]] = person(it["name"], it["title"], it["faction"],it["sprite"],it["initialText"]);
 
 		json islandsData = json::parse(fislands);
-		portMap[{islandsData["x"], islandsData["y"]}] = port(islandsData["x"], islandsData["y"], islandsData["name"], &personMap[islandsData["leader"]]);
+		for(auto it : islandsData)
+			portMap[{it["x"], it["y"]}] = port(it["x"], it["y"], it["name"], &personMap[it["leader"]]);
+		//==========================================================================================================
 
-		//portMap["none"] = port(0, 0, "None", &personMap[0]);
-		//portMap["arbroath"] = port(0,0,"Arbroath", &personMap[0]);
+		//player.currentPort = &portMap[{302, 108}];
+		//islandMap = generateIsland(player.currentPort->x, player.currentPort->y);
 
-		player.currentPort = &portMap[{islandsData["x"], islandsData["y"]}];
-
-		islandMap = generateIsland(player.currentPort->x, player.currentPort->y);
-
-		
+		islandMap.clear();
 
 		//Create initial 11x11 tile map
 		for (int i = -5; i <= 5; i++) {
@@ -283,9 +294,9 @@ public:
 				float angleDeg = player.angle * (180 / PI);
 
 				float o = sin(player.angle - (PI / 2));
-				o *= 200 * fElapsedTime;
+				o *= player.speed * fElapsedTime;
 				float a = cos(player.angle - (PI / 2));
-				a *= 200 * fElapsedTime;
+				a *= player.speed * fElapsedTime;
 
 				player.x += a;
 				player.y += o;
@@ -294,9 +305,9 @@ public:
 				float angleDeg = player.angle * (180 / PI);
 
 				float o = sin(player.angle - (PI / 2));
-				o *= 200 * fElapsedTime;
+				o *= player.speed * fElapsedTime;
 				float a = cos(player.angle - (PI / 2));
-				a *= 200 * fElapsedTime;
+				a *= player.speed * fElapsedTime;
 
 				player.x -= a;
 				player.y -= o;
@@ -307,6 +318,8 @@ public:
 			boatTilex = ceil(player.x / 50) - 1;
 			boatTiley = ceil(player.y / 50) - 1;
 
+
+			//ENTER NEW TILE
 			if ((premoveTilex != boatTilex) || (premoveTiley != boatTiley)) {
 				byte xdiff = boatTilex - premoveTilex;
 				byte ydiff = boatTiley - premoveTiley;
@@ -327,6 +340,21 @@ public:
 				*/
 
 				std::map<std::tuple<int, int>, tile*> newView;
+
+				std::map<std::tuple<int, int>, port>::iterator it;
+
+				for (it = portMap.begin(); it != portMap.end(); it++) {
+					if (boatTilex == it->second.x - 24 || boatTilex == it->second.x + 24 || boatTiley == it->second.y - 24 || boatTiley == it->second.y + 24) {
+						if (player.currentPort == nullptr) {
+							player.currentPort = &it->second;
+							islandMap = generateIsland(player.currentPort->x, player.currentPort->y,boatTilex,boatTiley);
+						}
+						else {
+							player.currentPort = nullptr;
+							islandMap.clear();
+						}
+					}
+				}
 
 				for (int i = -5; i <= 5; i++) {
 					for (int j = -5; j <= 5; j++) {
@@ -477,6 +505,9 @@ public:
 
 			DrawString(10, 10, std::to_string(player.x) + " (" + std::to_string(boatTilex) + "," + std::to_string(boatTiley) + ")");
 			DrawString(10, 30, std::to_string(player.y));
+			DrawString(10, 50, screenView[{0,0}]->type);
+			if(player.currentPort != nullptr)
+				DrawString(110, 70, player.currentPort->name);
 
 			//DrawRect(245,240,10,20);
 
@@ -488,16 +519,17 @@ public:
 			}
 		}
 		if(menueOpen==PORT){
-			SetPixelMode(olc::Pixel::ALPHA);
+			if (player.currentPort != nullptr) {
+				SetPixelMode(olc::Pixel::ALPHA);
 
-			DrawSprite(0,0,&portSprite);
-			FillRect(10, 10, 480, 380, { 128,128,128,160 });
-			DrawString(25, 25, player.currentPort->name,olc::WHITE,2);
+				DrawSprite(0, 0, &portSprite);
+				FillRect(10, 10, 480, 380, { 128,128,128,160 });
+				DrawString(25, 25, player.currentPort->name, olc::WHITE, 2);
 
-			DrawSprite(0, 400, &player.currentPort->leader->sprite);
-			DrawString(110,410, player.currentPort->leader->name);
-			DrawString(110,430, player.currentPort->leader->initialText,olc::WHITE);
-
+				DrawSprite(0, 400, &player.currentPort->leader->sprite);
+				DrawString(110, 410, player.currentPort->leader->name);
+				DrawString(110, 430, player.currentPort->leader->initialText, olc::WHITE);
+			}
 			if (GetKey(olc::ESCAPE).bPressed) {
 				menueOpen = MAP;
 			}

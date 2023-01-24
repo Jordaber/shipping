@@ -15,12 +15,12 @@ public:
 		sprite = olc::Sprite("person.png");
 	}
 
-	person(std::string name, std::string title, std::string faction) {
+	person(std::string name, std::string title, std::string faction, std::string sprite, std::string initialText) {
 		this->name = name;
 		this->title = title;
 		this->faction = faction;
-		sprite = olc::Sprite("person.png");
-		initialText = "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit, sed do eiusmod tempor\nincididunt ut labore et dolore magna\naliqua. Ut enim ad minim veniam,\nquis nostrud exercitation ullamco laboris nisi\n";
+		this->sprite = olc::Sprite(sprite);
+		this->initialText = initialText;
 	}
 };
 
