@@ -9,6 +9,7 @@ public:
 	int y;
 	olc::Sprite sprite;
 	person* leader;
+	std::map<std::string, float> sells;
 
 	port() {
 		name = "default";

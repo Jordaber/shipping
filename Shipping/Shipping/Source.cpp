@@ -43,33 +43,46 @@ std::map<std::tuple<int, int>, tile*> generateIsland(int x, int y, int px, int p
 		int x;
 		int y;
 		int radius;
+		bool subtract;
 	};
 
 	std::list<blob> blobs;
 
 	for (int i = 0; i < 6; i++) {
 		blob b;
-		b.x = 13 + rand() % 16;
-		b.x += px;
-		b.y = 13 + rand() % 16;
-		b.y += py;
+		b.x = -6 + rand() % 6;
+		b.x += x;
+		b.y = -6 + rand() % 6;
+		b.y += y;
 		b.radius = rand() % 8;
+		bool s = (rand()) % 3==0;
+		if (b.radius < 2 && s)
+			b.subtract == true;
+		else
+			b.subtract == false;
 		blobs.push_back(b);
 	}
 
-	for (int i = px; i < px+40; i++) {
-		for (int j = py; j < py+40; j++) {
+	for (int i = x-28; i < x+28; i++) {
+		for (int j = y-28; j < y+28; j++) {
 			bool found = false;
 			for (blob b : blobs) {
 				int xs = pow((i - b.x),2);
 				int ys = pow((j - b.y),2);
 
 				double d = sqrt(xs + ys);
+				
 				if (ceil(d) == b.radius) {
-					islandMap[{i, j}] = &tileTypeMap["defaultL"];
+					if(b.subtract)
+						islandMap[{i, j}] = &tileTypeMap["defaultL"];
+					else
+						islandMap[{i, j}] = &tileTypeMap["defaultS"];
 				}
 				if (d < b.radius) {
-					islandMap[{i, j}] = &tileTypeMap["defaultL"];
+					if (b.subtract)
+						islandMap[{i, j}] = &tileTypeMap["defaultL"];
+					else
+						islandMap[{i, j}] = &tileTypeMap["defaultS"];
 					found = true;
 					break;
 				}
@@ -79,8 +92,8 @@ std::map<std::tuple<int, int>, tile*> generateIsland(int x, int y, int px, int p
 		}
 	}
 	
-	for (int i = px+1; i < px+39; i++) {
-		for (int j = py+1; j < py+39; j++) {
+	for (int i = x-27; i < x+27; i++) {
+		for (int j = y-27; j < y+27; j++) {
 			if (islandMap[{i, j}]->type == "defaultl") {
 				byte v = 0;
 				
@@ -194,6 +207,8 @@ public:
 	byte menueOpen = PORT; //ENUM(map,port,)
 	std::tuple<int, int> CurrentIslandCoord;
 
+	bool drawsells = false;
+
 	bool OnUserCreate() override
 	{
 		// Called once at the start, so create things here
@@ -219,7 +234,7 @@ public:
 		tileTypeMap["tile15"] = tile(0, 0, "default15", "tile015.png");
 		tileTypeMap["edge"] = tile(0, 0, "default", "edge.png");
 
-		player = boat(750, 750);
+		player = boat(40000, 45000);
 		portSprite = olc::Sprite("port.png");
 
 
@@ -234,8 +249,11 @@ public:
 			personMap[it["id"]] = person(it["name"], it["title"], it["faction"],it["sprite"],it["initialText"]);
 
 		json islandsData = json::parse(fislands);
-		for(auto it : islandsData)
+		for (auto it : islandsData) {
 			portMap[{it["x"], it["y"]}] = port(it["x"], it["y"], it["name"], &personMap[it["leader"]]);
+			if (it.count("sells"))
+				portMap[{it["x"], it["y"]}].sells = it["sells"];
+		}
 		//==========================================================================================================
 
 		//player.currentPort = &portMap[{302, 108}];
@@ -344,15 +362,18 @@ public:
 				std::map<std::tuple<int, int>, port>::iterator it;
 
 				for (it = portMap.begin(); it != portMap.end(); it++) {
-					if (boatTilex == it->second.x - 24 || boatTilex == it->second.x + 24 || boatTiley == it->second.y - 24 || boatTiley == it->second.y + 24) {
+					if (boatTilex >= it->second.x - 20 && boatTilex <= it->second.x + 20 && boatTiley >= it->second.y - 20 && boatTiley <= it->second.y + 20) {
 						if (player.currentPort == nullptr) {
 							player.currentPort = &it->second;
 							islandMap = generateIsland(player.currentPort->x, player.currentPort->y,boatTilex,boatTiley);
 						}
 						else {
-							player.currentPort = nullptr;
-							islandMap.clear();
+							if (boatTilex == it->second.x - 20 || boatTilex == it->second.x + 20 || boatTiley == it->second.y - 20 || boatTiley == it->second.y + 20) {
+								player.currentPort = nullptr;
+								islandMap.clear();
+							}
 						}
+						break;
 					}
 				}
 
@@ -507,7 +528,11 @@ public:
 			DrawString(10, 30, std::to_string(player.y));
 			DrawString(10, 50, screenView[{0,0}]->type);
 			if(player.currentPort != nullptr)
-				DrawString(110, 70, player.currentPort->name);
+				DrawString(10, 70, player.currentPort->name);
+			double lat = MAX_LAT - (player.y * COORD_INC);
+			double lon = (player.x * COORD_INC) + MIN_LON;
+
+			DrawString(10, 90, std::to_string(lat) + " , " + std::to_string(lon));
 
 			//DrawRect(245,240,10,20);
 
@@ -524,14 +549,40 @@ public:
 
 				DrawSprite(0, 0, &portSprite);
 				FillRect(10, 10, 480, 380, { 128,128,128,160 });
+				if (!drawsells) {
+					FillRect(25, 50, 30, 20, { 128,128,128,200 });
+					DrawString(25, 50, "Buy");
+				}
+				else {
+					std::map<std::string, float>::iterator it;
+					int yoffset = 50;
+					for (it = player.currentPort->sells.begin(); it != player.currentPort->sells.end(); it++) {
+						DrawString(25,yoffset,it->first + " - $"+std::to_string(it->second));
+						yoffset += 20;
+					}
+				}
+
+
 				DrawString(25, 25, player.currentPort->name, olc::WHITE, 2);
 
 				DrawSprite(0, 400, &player.currentPort->leader->sprite);
 				DrawString(110, 410, player.currentPort->leader->name);
 				DrawString(110, 430, player.currentPort->leader->initialText, olc::WHITE);
+
+				
+
+				if (GetMouse(0).bPressed) {
+					if ((GetMouseX() >= 25 && GetMouseX() <= 105) && (GetMouseY() >= 50 && GetMouseY() <= 90)) {
+						drawsells = true;
+					}
+				}
 			}
 			if (GetKey(olc::ESCAPE).bPressed) {
 				menueOpen = MAP;
+				drawsells = false;
+			}
+			if (GetKey(olc::BACK).bPressed) {
+				drawsells = false;
 			}
 		}
 

@@ -7,12 +7,20 @@
 		"sprite": "person.png",
 		"initialText": "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit, sed do eiusmod tempor\nincididunt ut labore et dolore magna\naliqua. Ut enim ad minim veniam,\nquis nostrud exercitation ullamco laboris nisi\n"
 	},
-	"1" : {
+	"1": {
 		"id": 1,
 		"name": "Buster Bloodvessel",
 		"title": "Mayor ",
 		"faction": "UK",
 		"sprite": "people/specific/buster.png",
-		"initialText": "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit, sed do eiusmod tempor\nincididunt ut labore et dolore magna\naliqua. Ut enim ad minim veniam,\nquis nostrud exercitation ullamco laboris nisi\n"
+		"initialText": "Alright then, wot you doing in my port then?"
+	},
+	"2": {
+		"id": 2,
+		"name": "Benny Harvey",
+		"title": "RIP ",
+		"faction": "UK",
+		"sprite": "people/specific/bennyharveyrip.png",
+		"initialText":  "*dead people sounds*"
 	}
 }

@@ -10,6 +10,8 @@ public:
 	double y;
 	double angle = 0;
 	float speed = 200; //5.2 = 8knots
+	float ballance = 500.0;
+	std::map<std::string, float> inventory;
 
 	std::string spriteaddr = "boat.png";
 	olc::Sprite sprite;

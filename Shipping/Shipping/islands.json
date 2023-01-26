@@ -1,18 +1,38 @@
 {
-	"ballerbay" : {
+	"ballerbay": {
 		"tag": "ballerbay",
-		"x" : 89,
-		"y" : 104,
-		"name" : "Baller Bay",
+		"x": 89,
+		"y": 104,
+		"name": "Baller Bay",
 		"image": "port.png",
-		"leader" : 0
+		"leader": 0,
+		"sells": {
+			"beer": 100,
+			"fish": 12
+		}
 	},
-	"ligmalagoon" : {
-		"tag": "ligmalagoon",
-		"x" : 302,
-		"y" : 108,
-		"name" : "Ligma Lagoon",
+	"ligmalagoon": {
+		"tag": "fattytowers",
+		"x": 302,
+		"y": 108,
+		"name": "Fatty Towers",
 		"image": "port.png",
-		"leader" : 1
+		"leader": 1,
+		"sells": {
+			"beer": 100,
+			"fish": 12
+		}
+	},
+	"yoker": {
+		"tag": "yoker",
+		"x": 800,
+		"y": 1004,
+		"name": "Yoker",
+		"image": "port.png",
+		"leader": 2,
+		"sells": {
+			"beer": 100,
+			"fish": 12
+		}
 	}
 }
