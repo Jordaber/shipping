@@ -9,6 +9,7 @@
 #include "person.h"
 #include "constants.h"
 #include "PerlinNoise.hpp"
+#include "UI.h";
 
 using json = nlohmann::json;
 
@@ -25,6 +26,8 @@ std::map<std::tuple<int,int>, port> portMap;
 std::map<int, person> personMap;
 
 std::map<std::string, tile> tileTypeMap;
+
+std::map<std::string, UI_Container> UIMap;
 
 std::map<std::tuple<int, int>, tile*> screenView;
 const siv::PerlinNoise::seed_type seed = 123456u;
@@ -236,7 +239,11 @@ public:
 
 		player = boat(40000, 45000);
 		portSprite = olc::Sprite("port.png");
+		
+		UIMap["portUI"] = UI_Container("portUI");
 
+		UIMap["portUI"].add(UI_Element(0, 0, ElementType::IMAGE, "", &portSprite));
+		UIMap["portUI"].add(UI_Element(0, 0, ElementType::IMAGE, "", &portSprite));
 
 
 		//                                  READ PEOPLE AND ISALNDS FROM FILE

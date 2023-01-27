@@ -154,6 +154,7 @@
     <ClInclude Include="port.h" />
     <ClInclude Include="resources.h" />
     <ClInclude Include="tile.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

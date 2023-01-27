@@ -50,5 +50,8 @@
     <ClInclude Include="nlohmann\json_fwd.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
