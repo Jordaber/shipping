@@ -240,11 +240,16 @@ public:
 		player = boat(40000, 45000);
 		portSprite = olc::Sprite("port.png");
 		
+		/*
 		UIMap["portUI"] = UI_Container("portUI");
 
-		UIMap["portUI"].add(UI_Element(0, 0, ElementType::IMAGE, "", &portSprite));
-		UIMap["portUI"].add(UI_Element(0, 0, ElementType::IMAGE, "", &portSprite));
-
+		UIMap["portUI"].add(UI_Element(0, 0, ElementType::IMAGE, &portSprite));
+		UIMap["portUI"].add(UI_Element(10, 10, 480, 380, ElementType::PANEL, { 128,128,128,160 }));
+		UIMap["portUI"].add(UI_Element(25, 25, ElementType::LABEL, player.currentPort->name, 2));
+		UIMap["portUI"].add(UI_Element(0, 400, ElementType::IMAGE, &player.currentPort->leader->sprite));
+		UIMap["portUI"].add(UI_Element(110, 410, ElementType::LABEL, player.currentPort->leader->name,1));
+		UIMap["portUI"].add(UI_Element(110, 430, ElementType::LABEL, player.currentPort->leader->initialText,1));
+		*/
 
 		//                                  READ PEOPLE AND ISALNDS FROM FILE
 		//==========================================================================================================
@@ -390,144 +395,6 @@ public:
 					}
 				}
 				screenView = newView;
-
-				/*
-				switch (diff) {
-				case 0x0001:
-					//Move all tiles up relative
-					for (int i = -5; i <= 5; i++) {
-						for (int j = -5; j <= 5; j++) {
-							if (j < 5) {
-								newView[{i, j}] = screenView[{i, j + 1}];
-							}
-							if (j == 5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-						}
-					}
-					screenView = newView;
-					break;
-				case 0x00FF:
-					//Move all tiles down relative
-					for (int i = -5; i <= 5; i++) {
-						for (int j = -5; j <= 5; j++) {
-							if (j > -5) {
-								newView[{i, j}] = screenView[{i, j - 1}];
-							}
-							if (j == -5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-						}
-					}
-					screenView = newView;
-					break;
-				case 0x0100:
-					//Move all tiles left relative
-					for (int i = -5; i <= 5; i++) {
-						for (int j = -5; j <= 5; j++) {
-							if (i < 5) {
-								newView[{i, j}] = screenView[{i + 1, j}];
-							}
-							if (i == 5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-						}
-					}
-					screenView = newView;
-					break;
-				case 0xFF00:
-					//Move all tiles right relative
-					for (int i = -5; i <= 5; i++) {
-						for (int j = -5; j <= 5; j++) {
-							if (i > -5) {
-								newView[{i, j}] = screenView[{i - 1, j}];
-							}
-							if (i == -5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-						}
-					}
-					screenView = newView;
-					screenView = newView;
-					break;
-				case 0x0101:
-					//Move tiles up and right
-					for (int i = -5; i <= 5; i++) {
-						for (int j = -5; j <= 5; j++) {
-							if (j < 5) {
-								newView[{i, j}] = screenView[{i, j + 1}];
-							}
-							if (j == 5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-							if (i > -5) {
-								newView[{i, j}] = screenView[{i - 1, j}];
-							}
-							if (i == -5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-						}
-					}
-					break;
-				case 0xFF01:
-					//Move tiles up and left
-					for (int i = -5; i <= 5; i++) {
-						for (int j = -5; j <= 5; j++) {
-							if (j < 5) {
-								newView[{i, j}] = screenView[{i, j + 1}];
-							}
-							if (j == 5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-							if (i < 5) {
-								newView[{i, j}] = screenView[{i + 1, j}];
-							}
-							if (i == 5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-						}
-					}
-					break;
-				case 0x01FF:
-					//Move tiles down and left
-					for (int i = -5; i <= 5; i++) {
-						for (int j = -5; j <= 5; j++) {
-							if (j > -5) {
-								newView[{i, j}] = screenView[{i, j - 1}];
-							}
-							if (j == -5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-							if (i < 5) {
-								newView[{i, j}] = screenView[{i + 1, j}];
-							}
-							if (i == 5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-						}
-					}
-					break;
-				case 0xFFFF:
-					//Move tiles down and right
-					for (int i = -5; i <= 5; i++) {
-						for (int j = -5; j <= 5; j++) {
-							if (j > -5) {
-								newView[{i, j}] = screenView[{i, j - 1}];
-							}
-							if (j == -5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-							if (i > -5) {
-								newView[{i, j}] = screenView[{i - 1, j}];
-							}
-							if (i == -5) {
-								newView[{i, j}] = generateTile(boatTilex + i, boatTiley + j);
-							}
-						}
-					}
-					break;
-				}
-				*/
 			}
 
 
@@ -553,7 +420,7 @@ public:
 		if(menueOpen==PORT){
 			if (player.currentPort != nullptr) {
 				SetPixelMode(olc::Pixel::ALPHA);
-
+				
 				DrawSprite(0, 0, &portSprite);
 				FillRect(10, 10, 480, 380, { 128,128,128,160 });
 				if (!drawsells) {
@@ -576,7 +443,26 @@ public:
 				DrawString(110, 410, player.currentPort->leader->name);
 				DrawString(110, 430, player.currentPort->leader->initialText, olc::WHITE);
 
-				
+				/*
+				std::map<std::string, UI_Container>::iterator it;
+				for (it = UIMap.begin(); it != UIMap.end(); it++) {
+					for (UI_Element element : it->second.elements) {
+						switch (element.type)
+						{
+						case ElementType::IMAGE:
+							DrawSprite(element.x, element.y, element.sprite);
+							break;
+						case ElementType::LABEL:
+							FillRect(element.x, element.y, element.w, element.h, { 128,128,128,200 });
+							break;
+						case ElementType::PANEL:
+							DrawString(element.x, element.y, element.text, element.size);
+							break;
+						default:
+							break;
+						}
+					}
+				}*/
 
 				if (GetMouse(0).bPressed) {
 					if ((GetMouseX() >= 25 && GetMouseX() <= 105) && (GetMouseY() >= 50 && GetMouseY() <= 90)) {

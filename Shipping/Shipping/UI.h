@@ -36,6 +36,14 @@ public:
 		this->sprite = sprite;
 	}
 
+	UI_Element(int x, int y, int w, int h, ElementType type, std::tuple<int,int,int,int> colour) {
+		this->x = x;
+		this->y = y;
+		this->w = w;
+		this->h = h;
+		this->colour = colour;
+	}
+
 	UI_Element(int x, int y, ElementType type, std::string text, int size) {
 		this->x = x;
 		this->y = y;
